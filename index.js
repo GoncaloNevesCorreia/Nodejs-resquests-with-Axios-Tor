@@ -25,11 +25,11 @@ const url = "YOUR_URL"; // Change the endpoint
         };
 
         try {
-            await sendPostRequest(url, options).then((res) => {
-                console.clear();
-                console.log(`Requests Sent: ${++info.dataSent}`);
-                console.log(`IP updated ${info.ipUpdated} times.`);
-            });
+            await sendPostRequest(url, options);
+
+            console.clear();
+            console.log(`Requests Sent: ${++info.dataSent}`);
+            console.log(`IP updated ${info.ipUpdated} times.`);
         } catch (err) {
             console.log(err);
             break;
@@ -58,7 +58,7 @@ function getRandomNumberBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-async function sendPostRequest(url, options) {
+function sendPostRequest(url, options) {
     return tor.post(url, options);
 }
 
