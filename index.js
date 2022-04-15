@@ -13,11 +13,15 @@ const info = {
 
 const url = "YOUR_URL"; // Change the endpoint
 
-(async () => {
-    const secondsBetweenUpdates = 20;
-    updateTorSession(secondsBetweenUpdates);
+const secondsBetweenIpUpdates = 20;
+const millisecondsBetweenRequests = 30;
 
-    while (true) {
+(async () => {
+    updateTorSession(secondsBetweenIpUpdates);
+
+    let sendRequests = true;
+
+    while (sendRequests) {
         // data to send for each request
         const options = {
             user: generateEmail(),
@@ -25,10 +29,17 @@ const url = "YOUR_URL"; // Change the endpoint
         };
 
         try {
-            await sendPostRequest(url, options);
+            sendPostRequest(url, options).then((res) => {
+                if (res.status !== 200) {
+                    sendRequests = false;
+                    return;
+                }
+                ++info.dataSent;
+            });
+            await sleep(millisecondsBetweenRequests);
 
             console.clear();
-            console.log(`Requests Sent: ${++info.dataSent}`);
+            console.log(`Requests Sent: ${info.dataSent}`);
             console.log(`IP updated ${info.ipUpdated} times.`);
         } catch (err) {
             console.log(err);
@@ -41,9 +52,15 @@ function generateEmail() {
     return (
         getRandomString(getRandomNumberBetween(6, 16)) +
         "@" +
-        getRandomString(getRandomNumberBetween(4, 8)) +
+        getValidEmailDomain() +
         ".com"
     );
+}
+
+function getValidEmailDomain() {
+    const domains = ["gmail", "outlook", "netease", "hotmail", "tencent"];
+    const index = Math.floor(Math.random() * domains.length);
+    return domains[index];
 }
 
 function generatePassword() {
@@ -67,4 +84,8 @@ function updateTorSession(seconds) {
         tor.torNewSession();
         info.ipUpdated++;
     }, seconds * 1000);
+}
+
+function sleep(milliseconds) {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
